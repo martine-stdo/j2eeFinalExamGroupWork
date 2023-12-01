@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iss.edu.online.mapper.EmployeeDao">
+
+    <insert id="insert">
+        insert into employee(empno, ename, password, job, mgr, hiredate, sal, comm, deptno)
+        values (#{empno}, #{ename}, #{password}, #{job}, #{mgr}, #{hiredate}, #{sal}, #{comm}, #{deptno});
+    </insert>
+
+    <update id="update">
+        update employee
+        <set>
+            <if test="ename != null and ename != ''">
+                ename = #{ename},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="job != null and job != ''">
+                or job = #{job}
+            </if>
+        </set>
+        where empno = #{empno}
+    </update>
+
+    <delete id="delete">
+        delete
+        from employee
+        where empno = #{empno}
+    </delete>
+
+    <resultMap id="employeeMap" type="Employee">
+        <id property="empno" column="empno"/>
+        <result property="ename" column="ename"/>
+        <result property="password" column="password"/>
+        <result property="job" column="job"/>
+        <result property="mgr" column="mgr"/>
+        <result property="hiredate" column="hiredate"/>
+        <result property="sal" column="sal"/>
+        <result property="comm" column="comm"/>
+        <association property="department" javaType="Department">
+            <id property="deptno" column="deptno"/>
+            <result property="dname" column="dname"/>
+            <result property="location" column="loc"/>
+        </association>
+    </resultMap>
+
+    <select id="queryEmployees" resultMap="employeeMap">
+        select e.empno,
+               e.ename,
+               e.password,
+               e.job,
+               e.mgr,
+               e.hiredate,
+               e.sal,
+               e.comm,
+               d.deptno,
+               d.dname,
+               d.loc
+        from employee e
+                 left join department d on d.deptno = e.deptno limit #{pageSize} offset #{start}
+    </select>
+
+    <select id="queryByParams" parameterType="Employee" resultType="Employee">
+        select * from employee
+        <where>
+            <if test="ename != null and ename != ''">
+                ename = #{ename}
+            </if>
+            <if test="job != null and job != ''">
+                or job = #{job}
+            </if>
+        </where>
+    </select>
+
+
+    <delete id="deletes">
+        delete from employee where empno in
+        <foreach collection="empnos" open="(" separator="," close=")" item="empno">
+            #{empno}
+        </foreach>
+    </delete>
+
+
+    <resultMap id="departmentMap" type="Department">
+        <id property="deptno" column="deptno"/>
+        <result property="dname" column="dname"/>
+        <result property="location" column="loc"/>
+        <collection property="employees" ofType="Employee">
+            <id property="empno" column="empno"/>
+            <result property="ename" column="ename"/>
+            <result property="password" column="password"/>
+            <result property="job" column="job"/>
+            <result property="mgr" column="mgr"/>
+            <result property="hiredate" column="hiredate"/>
+            <result property="sal" column="sal"/>
+            <result property="comm" column="comm"/>
+        </collection>
+    </resultMap>
+
+    <select id="queryEmployeesByDeptno" resultMap="departmentMap">
+        select d.deptno,
+               d.dname,
+               d.loc,
+               e.empno,
+               e.ename,
+               e.password,
+               e.job,
+               e.mgr,
+               e.hiredate,
+               e.sal,
+               e.comm
+        from department d
+                 left join employee e on d.deptno = e.deptno
+        where d.DEPTNO = #{deptno}
+    </select>
+
+
+
+    <select id="login" parameterType="User" resultType="User">
+        select *
+        from user
+        where username = #{username}
+          and password = #{password}
+    </select>
+    <select id="count" resultType="java.lang.Integer">
+        select count(*) from employee;
+    </select>
+    <select id="queryEmployeesVO" resultType="com.iss.edu.online.model.EmployeeVO">
+        select e.ename,
+               e.job,
+               e.sal,
+               d.dname
+        from employee e
+                 left join department d on d.deptno = e.deptno
+    </select>
+
+
+</mapper>

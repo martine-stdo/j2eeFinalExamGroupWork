@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iss.edu.online.mapper.CourseDao">
+    <select id="queryCourse" resultType="com.iss.edu.online.model.CourseVO">
+        select c.CourseID,
+               c.CourseName,
+               c.CourseDescription,
+               c.CourseStartTime,
+               c.CourseEndTime,
+               u.username,
+               c.TeacherID
+        from courses c
+                left join user u on c.TeacherID = u.id limit #{pageSize} offset #{start}
+
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        select count(*) from courses;
+    </select>
+</mapper>
